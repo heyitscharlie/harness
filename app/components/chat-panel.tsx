@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button, Input, Typography, cn } from "@heyitscharlie/design-system";
+import { Button, Typography, cn } from "@heyitscharlie/design-system";
+import { Textarea } from "@/components/ui/textarea";
 import type { AgentStep } from "@/lib/harness/agent/tool";
 import type { AgentResult } from "@/lib/harness/agent/run-agent";
 import { Trace } from "./trace";
@@ -97,19 +98,29 @@ export function ChatPanel() {
 
       {/* Sticky: stays pinned to the bottom of the screen while messages scroll behind it. */}
       <form
-        className="sticky bottom-0 -mx-4 mt-auto flex gap-2 border-t bg-background/80 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8"
+        className="sticky bottom-0 -mx-4 mt-auto flex items-end gap-2 border-t bg-background/80 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8"
         onSubmit={(e) => {
           e.preventDefault();
           send(input);
         }}
       >
-        <Input
+        <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Message the agent…"
+          onKeyDown={(e) => {
+            // Enter sends; Shift+Enter adds a new line. Skip while an IME
+            // (e.g. Japanese input) is composing, or Enter would send half a word.
+            if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+              e.preventDefault();
+              send(input);
+            }
+          }}
+          placeholder="Message the agent… (Shift+Enter for a new line)"
           maxLength={4000}
-          disabled={pending}
+          rows={1}
           aria-label="Message"
+          // Grows with the text (field-sizing-content) up to max-h-48, then scrolls.
+          className="max-h-48 min-h-10 resize-none"
         />
         <Button type="submit" disabled={pending || !input.trim()}>
           Send
