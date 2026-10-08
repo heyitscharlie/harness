@@ -1,7 +1,7 @@
 // The agent's long-term memory: notes saved with add_note, stored in Postgres
 // so they survive across requests and deploys (unlike server memory).
 import { neon } from "@neondatabase/serverless";
-import type { Store } from "@/lib/example/tools";
+import type { Store } from "@/lib/assistant/tools";
 
 const sql = () => {
   const url = process.env.DATABASE_URL;

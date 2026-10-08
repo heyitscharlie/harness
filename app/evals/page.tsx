@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Typography } from "@heyitscharlie/design-system";
-import { SYSTEM_PROMPT } from "@/lib/example/agent";
-import { SUITE } from "@/lib/example/suite";
+import { SYSTEM_PROMPT } from "@/lib/assistant/agent";
+import { SUITE } from "@/lib/assistant/suite";
 import { EvalsPanel } from "../components/evals-panel";
 import { ProductionPanel } from "../components/production-panel";
 

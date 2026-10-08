@@ -4,9 +4,9 @@
 // isn't a regression.
 import { appendFileSync } from "node:fs";
 import { runCase } from "../lib/harness/evals/run-case";
-import { createAgentConfig } from "../lib/example/agent";
-import { createStore } from "../lib/example/tools";
-import { SUITE } from "../lib/example/suite";
+import { createAgentConfig } from "../lib/assistant/agent";
+import { createStore } from "../lib/assistant/tools";
+import { SUITE } from "../lib/assistant/suite";
 
 try {
   process.loadEnvFile(".env.local"); // local runs; CI passes env vars directly

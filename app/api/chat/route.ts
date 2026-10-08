@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { runAgent } from "@/lib/harness/agent/run-agent";
 import { DEFAULT_MODEL } from "@/lib/harness/agent/gemini";
-import { createAgentConfig } from "@/lib/example/agent";
+import { createAgentConfig } from "@/lib/assistant/agent";
 import { conversationExists, createConversation, deleteConversation, getTurns, saveExchange } from "@/lib/history";
 import { createPostgresStore } from "@/lib/memory";
 

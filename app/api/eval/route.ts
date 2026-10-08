@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { runCase } from "@/lib/harness/evals/run-case";
-import { createAgentConfig } from "@/lib/example/agent";
-import { SUITE } from "@/lib/example/suite";
-import { createStore } from "@/lib/example/tools";
+import { createAgentConfig } from "@/lib/assistant/agent";
+import { SUITE } from "@/lib/assistant/suite";
+import { createStore } from "@/lib/assistant/tools";
 
 export const maxDuration = 60;
 

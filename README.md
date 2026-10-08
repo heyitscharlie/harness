@@ -30,7 +30,7 @@ lib/harness/     REUSABLE: no framework imports (enforced by ESLint)
     checks.ts      deterministic checks + LLM-as-judge (its verdict is validated too)
     run-case.ts    run one case → score it → CaseResult
 
-lib/example/     DEMO-SPECIFIC: replace in a new project
+lib/assistant/     DEMO-SPECIFIC: replace in a new project
   tools.ts         calculator, get_current_time, add_note, list_notes
   agent.ts         system prompt (with a canary string for prompt-leak tests)
   suite.ts         the six eval cases
