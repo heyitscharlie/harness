@@ -61,8 +61,8 @@ export function ChatPanel() {
   }
 
   return (
-    // Fill the viewport below the header so the input sits at the bottom even when empty.
-    <div className="flex min-h-[calc(100dvh-13rem)] flex-col gap-4">
+    // flex-1: fill the height <main> leaves, so the input sits at the bottom even when empty.
+    <div className="flex flex-1 flex-col gap-4">
       {messages.length === 0 && (
         <div className="flex flex-col gap-3">
           <Typography variant="label">Try one of these, or ask anything:</Typography>
