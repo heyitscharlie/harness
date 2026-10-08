@@ -1,4 +1,4 @@
-import { DEFAULT_MODEL, getClient, toGeminiSchema } from "../agent/gemini";
+import { DEFAULT_MODEL, generate, toGeminiSchema } from "../agent/gemini";
 import type { AgentStep } from "../agent/tool";
 import { JudgeVerdictSchema, type Check, type CheckResult } from "./schemas";
 
@@ -77,7 +77,7 @@ Assistant reply:
 ${ctx.reply}`;
 
   try {
-    const res = await getClient().models.generateContent({
+    const res = await generate({
       model: DEFAULT_MODEL,
       contents: prompt,
       config: {

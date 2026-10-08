@@ -1,5 +1,5 @@
 import type { Content, Part } from "@google/genai";
-import { DEFAULT_MODEL, getClient } from "./gemini";
+import { DEFAULT_MODEL, generate } from "./gemini";
 import { callTool, toFunctionDeclaration, type AgentStep, type AnyTool } from "./tool";
 
 /** The simple message shape the UI and API use. */
@@ -36,7 +36,7 @@ export async function runAgent(config: AgentConfig, messages: ChatMessage[]): Pr
   }));
 
   for (let i = 0; i < maxSteps; i++) {
-    const res = await getClient().models.generateContent({
+    const res = await generate({
       model,
       contents,
       config: {
