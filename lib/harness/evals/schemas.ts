@@ -1,23 +1,26 @@
 import { z } from "zod";
+import type { AgentStep } from "../agent/tool";
 
 /**
- * A check is one assertion about a model output. It's a discriminated union:
+ * A check is one assertion about an agent run. It's a discriminated union:
  * the `type` field tells Zod (and TypeScript) which shape the rest has.
  */
 export const CheckSchema = z.discriminatedUnion("type", [
+  // About the final reply text.
   z.object({ type: z.literal("contains"), value: z.string() }),
   z.object({ type: z.literal("not_contains"), value: z.string() }),
   z.object({ type: z.literal("regex"), pattern: z.string() }),
   z.object({ type: z.literal("max_length"), chars: z.number().int().positive() }),
-  // Output must be JSON that parses against the suite's Zod output schema.
-  z.object({ type: z.literal("json_schema") }),
-  // A top-level field of the JSON output must equal a value.
+  // About behaviour: which tools the agent called, and with what.
+  z.object({ type: z.literal("tool_called"), tool: z.string() }),
+  z.object({ type: z.literal("tool_not_called"), tool: z.string() }),
   z.object({
-    type: z.literal("json_field_equals"),
-    field: z.string(),
+    type: z.literal("tool_arg_equals"),
+    tool: z.string(),
+    arg: z.string(),
     equals: z.union([z.string(), z.number(), z.boolean(), z.null()]),
   }),
-  // A second LLM call grades the output 1-5 against a rubric.
+  // A second LLM call grades the reply 1-5 against a rubric.
   z.object({
     type: z.literal("llm_judge"),
     rubric: z.string(),
@@ -37,26 +40,10 @@ export const TestCaseSchema = z.object({
 });
 export type TestCase = z.infer<typeof TestCaseSchema>;
 
-/** Body of POST /api/eval: run one test case with a (possibly edited) prompt. */
-export const RunRequestSchema = z.object({
-  suiteId: z.string(),
-  caseId: z.string(),
-  systemPrompt: z.string().min(1).max(4000),
-});
-export type RunRequest = z.infer<typeof RunRequestSchema>;
-
 /** The judge model's verdict. The judge is an LLM too, so we validate it. */
 export const JudgeVerdictSchema = z.object({
   score: z.number().int().min(1).max(5),
   reasoning: z.string(),
-});
-
-/** Expected output of the "listing extraction" suite. */
-export const ListingSchema = z.object({
-  title: z.string().min(1),
-  price: z.number().nonnegative().nullable(),
-  currency: z.enum(["GBP", "USD", "EUR"]).nullable(),
-  condition: z.enum(["new", "like_new", "used", "for_parts"]),
 });
 
 // Results are produced by our own server code, not untrusted input, so
@@ -69,7 +56,8 @@ export type CheckResult = {
 
 export type CaseResult = {
   caseId: string;
-  output: string;
+  reply: string;
+  steps: AgentStep[];
   latencyMs: number;
   passed: boolean;
   checks: CheckResult[];
