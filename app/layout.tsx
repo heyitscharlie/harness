@@ -13,7 +13,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // ThemeProvider sets the .dark class and data-palette on <html> in the
     // browser, so the server-rendered markup differs slightly. That's expected.
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="bg-gradient-brand min-h-screen antialiased">
         <ThemeProvider defaultPalette="space" storageKey="harness-theme">
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
