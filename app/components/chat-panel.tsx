@@ -98,7 +98,7 @@ export function ChatPanel() {
 
       {/* Sticky: stays pinned to the bottom of the screen while messages scroll behind it. */}
       <form
-        className="sticky bottom-0 -mx-4 mt-auto flex items-end gap-2 border-t bg-background/80 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8"
+        className="sticky bottom-0 -mx-4 mt-auto flex items-end gap-2 bg-background/80 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8"
         onSubmit={(e) => {
           e.preventDefault();
           send(input);

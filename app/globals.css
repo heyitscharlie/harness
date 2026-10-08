@@ -14,7 +14,7 @@
   --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-accent: var(--secondary);
   --sidebar-accent-foreground: var(--secondary-foreground);
-  --sidebar-border: var(--border);
+  --sidebar-border: transparent; /* no divider lines around the sidebar */
   --sidebar-ring: var(--ring);
 }
 
