@@ -57,7 +57,17 @@ export async function POST(request: Request) {
       stoppedReason: result.stoppedReason,
     });
 
-    return Response.json({ conversationId, turn: { id: turnId, role: "assistant", text, steps: result.steps, latencyMs, feedback: null } });
+    const turn = {
+      id: turnId,
+      role: "assistant",
+      text,
+      steps: result.steps,
+      latencyMs,
+      model: DEFAULT_MODEL,
+      stoppedReason: result.stoppedReason,
+      feedback: null,
+    };
+    return Response.json({ conversationId, turn });
   } catch (err) {
     // The model provider failed (after retries). Not the client's fault: 502.
     return Response.json({ error: err instanceof Error ? err.message : "Model call failed" }, { status: 502 });

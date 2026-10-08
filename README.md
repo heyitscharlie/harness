@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Agent Harness
 
-## Getting Started
+A small, reusable **tool-calling agent** plus an **eval harness** that proves it behaves, wrapped in a Next.js app with a chat UI, saved history and a review workflow.
 
-First, run the development server:
+**Live:** [harness.heyitscharlie.com](https://harness.heyitscharlie.com) (access is managed through Vercel Deployment Protection).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+**Stack:** Next.js 16 (App Router) · TypeScript · Zod 4 · Gemini (`@google/genai`) · Neon Postgres · Tailwind 4 · [`@heyitscharlie/design-system`](https://www.npmjs.com/package/@heyitscharlie/design-system) + shadcn/ui · Vercel
+
+## What it does
+
+| Page | What it's for |
+| --- | --- |
+| **Chat** (`/`, `/c/[id]`) | Talk to the agent. Each reply shows its tool calls, 👍/👎, and a **details** toggle with the full stored trace (latency, model, stop reason, every tool call's arguments and result). Titles are editable. |
+| **History** (`/history`) | Every saved conversation with its stats, plus an overall 👍/👎 and evaluation notes per conversation. |
+| **Evals** (`/evals`) | **Production:** live quality signals from real traffic (tool-error rate, step-limit hits, feedback, latency) and the replies that need a look. **Test suite:** fixed cases scored automatically, with an editable system prompt to check a change before shipping it. |
+
+## Architecture
+
+```
+lib/harness/     REUSABLE: no framework imports (enforced by ESLint)
+  agent/
+    tool.ts        defineTool(): one Zod schema → JSON Schema for the model,
+                   runtime validation of its arguments, and types for execute()
+    run-agent.ts   the agent loop: model → tool calls → results → … until a
+                   text answer or maxSteps
+    gemini.ts      client, model choice, retries with backoff for 429/503 only
+  evals/
+    schemas.ts     test cases and checks (a Zod discriminated union)
+    checks.ts      deterministic checks + LLM-as-judge (its verdict is validated too)
+    run-case.ts    run one case → score it → CaseResult
+
+lib/example/     DEMO-SPECIFIC: replace in a new project
+  tools.ts         calculator, get_current_time, add_note, list_notes
+  agent.ts         system prompt (with a canary string for prompt-leak tests)
+  suite.ts         the six eval cases
+
+lib/history.ts   chat history in Postgres (raw SQL, bound parameters)
+db/schema.sql    conversations + turns (traces stored as JSONB)
+app/             UI and thin API routes: validate with Zod, call the harness,
+                 map failures to status codes
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Key decisions**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **One schema, three jobs.** Each tool's Zod schema tells the model what to send, validates what it actually sent, and types the implementation.
+- **Errors go back to the model as data.** Bad arguments, a hallucinated value or a failing tool become `{ error }` the model can react to, instead of a crash.
+- **Check behaviour, not just text.** Evals assert which tools were called and with what arguments. Text checks normalise numbers (`7,006,652` = `7006652`).
+- **Errored ≠ failed.** A rate limit says nothing about prompt quality, so provider errors are reported separately and never counted as regressions.
+- **The server owns the conversation.** The client sends one message; history is loaded from Postgres, capped to limit tokens, and can't be tampered with.
+- **Offline + online evals.** The test suite catches regressions you can predict; production traces, feedback and review notes catch the ones you can't.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Reusing the harness in another project
 
-## Learn More
+1. Copy `lib/harness/` (dependencies: `zod`, `@google/genai`).
+2. Define tools with `defineTool({ name, description, schema, execute })`.
+3. Run the agent: `runAgent({ systemPrompt, tools }, messages)` returns `{ reply, steps, stoppedReason }`.
+4. Write cases (input + checks) and score them with `runCase(config, testCase)`.
 
-To learn more about Next.js, take a look at the following resources:
+## Running locally
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install
+cp .env.example .env.local   # then fill in the values (or `vercel env pull`)
+npm run db:migrate           # creates the tables (safe to re-run)
+npm run dev                  # http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Variable | Purpose |
+| --- | --- |
+| `GEMINI_API_KEY` | Gemini API key ([AI Studio](https://aistudio.google.com/apikey)) |
+| `DATABASE_URL` | Postgres connection string (Neon via the Vercel Marketplace) |
+| `GEMINI_MODEL` | Optional. Defaults to `gemini-flash-lite-latest`; pin an exact version for repeatable evals |
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Pushes to `main` deploy to Vercel automatically. Environment variables live in the Vercel project, and the database was provisioned through the Vercel Marketplace (Neon).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Next steps
+
+- Run the eval suite in CI on every pull request.
+- Stream replies and tool calls as they happen.
+- One click to turn a reviewed conversation into a new eval case.
+- Track token usage and cost per conversation.

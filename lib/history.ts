@@ -21,6 +21,8 @@ export type Turn = {
   text: string;
   steps: AgentStep[];
   latencyMs: number | null;
+  model: string | null;
+  stoppedReason: string | null; // "done" | "max_steps"
   feedback: -1 | 1 | null;
 };
 
@@ -79,7 +81,7 @@ export async function listConversations(limit = 100): Promise<ConversationSummar
 
 export async function getTurns(conversationId: string): Promise<Turn[]> {
   const rows = await sql()`
-    select id, role, text, steps, latency_ms, feedback from turns
+    select id, role, text, steps, latency_ms, model, stopped_reason, feedback from turns
     where conversation_id = ${conversationId} order by id`;
   return rows.map((r) => ({
     id: Number(r.id),
@@ -87,6 +89,8 @@ export async function getTurns(conversationId: string): Promise<Turn[]> {
     text: r.text,
     steps: r.steps,
     latencyMs: r.latency_ms,
+    model: r.model,
+    stoppedReason: r.stopped_reason,
     feedback: r.feedback,
   }));
 }

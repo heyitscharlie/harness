@@ -7,10 +7,11 @@ import { Button, Typography, cn } from "@heyitscharlie/design-system";
 import { Textarea } from "@/components/ui/textarea";
 import type { Turn } from "@/lib/history";
 import { ChatTitle } from "./chat-title";
+import { TurnDetails } from "./turn-details";
 import { Trace } from "./trace";
 
-// id is missing only on the user's message until the page reloads from the database.
-type Message = Omit<Turn, "id" | "latencyMs"> & { id?: number };
+// The user's message has no id until the page reloads from the database.
+type Message = Omit<Turn, "id"> & { id?: number };
 
 const SUGGESTIONS = [
   "What's 1234 × 5678?",
@@ -42,7 +43,10 @@ export function ChatPanel({
 
   async function send(text: string) {
     if (!text.trim() || pending) return;
-    setMessages((m) => [...m, { role: "user", text: text.trim(), steps: [], feedback: null }]);
+    setMessages((m) => [
+      ...m,
+      { role: "user", text: text.trim(), steps: [], feedback: null, latencyMs: null, model: null, stoppedReason: null },
+    ]);
     setInput("");
     setPending(true);
     setError(null);
@@ -111,7 +115,7 @@ export function ChatPanel({
               {m.text}
             </div>
             {m.role === "assistant" && m.id !== undefined && (
-              <div className="flex gap-1">
+              <div className="flex flex-wrap items-start gap-1">
                 {([1, -1] as const).map((value) => {
                   const Icon = value === 1 ? ThumbsUp : ThumbsDown;
                   return (
@@ -128,6 +132,7 @@ export function ChatPanel({
                     </Button>
                   );
                 })}
+                <TurnDetails turn={m} />
               </div>
             )}
           </div>
