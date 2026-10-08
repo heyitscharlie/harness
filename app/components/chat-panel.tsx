@@ -61,7 +61,8 @@ export function ChatPanel() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    // Fill the viewport below the header so the input sits at the bottom even when empty.
+    <div className="flex min-h-[calc(100dvh-13rem)] flex-col gap-4">
       {messages.length === 0 && (
         <div className="flex flex-col gap-3">
           <Typography variant="label">Try one of these, or ask anything:</Typography>
@@ -75,7 +76,7 @@ export function ChatPanel() {
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-1 flex-col gap-3">
         {messages.map((m, i) => (
           <div key={i} className={cn("flex flex-col gap-2", m.role === "user" ? "items-end" : "items-start")}>
             {m.steps && <Trace steps={m.steps} />}
@@ -94,8 +95,9 @@ export function ChatPanel() {
         <div ref={endRef} />
       </div>
 
+      {/* Sticky: stays pinned to the bottom of the screen while messages scroll behind it. */}
       <form
-        className="flex gap-2"
+        className="sticky bottom-0 -mx-2 mt-auto flex gap-2 rounded-lg bg-background/80 p-2 backdrop-blur"
         onSubmit={(e) => {
           e.preventDefault();
           send(input);
