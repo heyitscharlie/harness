@@ -28,7 +28,9 @@ export function AppSidebar({ model }: { model: string }) {
     <Sidebar>
       <SidebarHeader className="gap-1 p-4">
         <Typography variant="h3">Agent Harness</Typography>
-        <Typography variant="label">model: {model}</Typography>
+        <Typography variant="label" className="text-sidebar-foreground/70">
+          model: {model}
+        </Typography>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -39,7 +41,7 @@ export function AppSidebar({ model }: { model: string }) {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === link.href}
-                    className="data-[active=true]:bg-popover data-[active=true]:font-medium data-[active=true]:[&>svg]:text-primary"
+                    className="data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium"
                   >
                     <Link href={link.href}>
                       <link.icon />

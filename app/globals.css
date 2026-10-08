@@ -6,16 +6,17 @@
 @source "../node_modules/@heyitscharlie/design-system/dist";
 
 /* shadcn's sidebar uses its own tokens; map them onto the design system's
- * palette so it follows space light/dark like everything else. */
+ * palette. The sidebar is the brand colour (--primary) in both modes. */
 :root {
-  --sidebar: var(--card);
-  --sidebar-foreground: var(--card-foreground);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: var(--secondary);
-  --sidebar-accent-foreground: var(--secondary-foreground);
+  --sidebar: var(--primary);
+  --sidebar-foreground: var(--primary-foreground);
+  --sidebar-primary: var(--primary-foreground);
+  --sidebar-primary-foreground: var(--primary);
+  /* Hover/active wash: translucent white reads on purple in both modes. */
+  --sidebar-accent: rgb(255 255 255 / 0.14);
+  --sidebar-accent-foreground: var(--primary-foreground);
   --sidebar-border: transparent; /* no divider lines around the sidebar */
-  --sidebar-ring: var(--ring);
+  --sidebar-ring: var(--primary-foreground);
 }
 
 @theme inline {
