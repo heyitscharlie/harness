@@ -1,23 +1,11 @@
-import { Button, Card, CardContent, CardTitle, ModeToggle, PaletteSwitcher } from "@heyitscharlie/design-system";
+import { DEFAULT_MODEL } from "@/lib/harness/agent/gemini";
+import { SYSTEM_PROMPT } from "@/lib/example/agent";
+import { SUITE } from "@/lib/example/suite";
+import { Workbench } from "./components/workbench";
 
-// Temporary page to prove the design system is wired up. Replaced in Step 7.
+// Server Component: reads server-only modules, then hands plain,
+// serialisable data to the client. Zod schemas and tools never leave the server.
 export default function Home() {
-  return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-4 p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl">Eval Harness</h1>
-        <div className="flex gap-2">
-          <PaletteSwitcher />
-          <ModeToggle />
-        </div>
-      </div>
-      <Card>
-        <CardTitle>Design system check</CardTitle>
-        <CardContent className="flex gap-2">
-          <Button>Primary</Button>
-          <Button variant="outline">Outline</Button>
-        </CardContent>
-      </Card>
-    </main>
-  );
+  const cases = SUITE.map(({ id, name, input }) => ({ id, name, input }));
+  return <Workbench model={DEFAULT_MODEL} defaultPrompt={SYSTEM_PROMPT} cases={cases} />;
 }

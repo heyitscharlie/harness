@@ -13,7 +13,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     // browser, so the server-rendered markup differs slightly. That's expected.
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-full antialiased">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider defaultPalette="space" storageKey="harness-theme">
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
