@@ -11,7 +11,7 @@ const eslintConfig = defineConfig([
     rules: {
       "no-restricted-imports": ["error", {
         patterns: [
-          { group: ["@/*", "**/souk/**"], message: "lib/harness must stay app-agnostic. Pass app-specific things in as arguments." },
+          { group: ["@/*", "**/partnerships/**"], message: "lib/harness must stay app-agnostic. Pass app-specific things in as arguments." },
           { group: ["next", "next/*", "react", "react-dom"], message: "lib/harness must not depend on a framework." },
         ],
       }],
