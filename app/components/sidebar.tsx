@@ -28,9 +28,7 @@ export function AppSidebar({ model }: { model: string }) {
     <Sidebar>
       <SidebarHeader className="gap-1 p-4">
         <Typography variant="h3">Agent Harness</Typography>
-        <Typography variant="label" className="text-sidebar-foreground/70">
-          model: {model}
-        </Typography>
+        <Typography variant="label">model: {model}</Typography>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

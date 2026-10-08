@@ -16,12 +16,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     // ThemeProvider sets the .dark class and data-palette on <html> in the
     // browser, so the server-rendered markup differs slightly. That's expected.
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
-      <body className="bg-gradient-brand min-h-screen antialiased">
+      <body className="min-h-screen bg-muted antialiased">
         <ThemeProvider defaultPalette="space" storageKey="harness-theme">
           <TooltipProvider>
             <SidebarProvider>
               <AppSidebar model={DEFAULT_MODEL} />
-              {/* Transparent so the body's gradient shows through. */}
+              {/* Transparent so the body's muted background shows through. */}
               <SidebarInset className="bg-transparent">
                 {/* On mobile the sidebar is a drawer; this button opens it. */}
                 <div className="px-4 pt-4 md:hidden">

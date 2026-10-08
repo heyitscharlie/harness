@@ -6,17 +6,22 @@
 @source "../node_modules/@heyitscharlie/design-system/dist";
 
 /* shadcn's sidebar uses its own tokens; map them onto the design system's
- * palette. The sidebar is the brand colour (--primary) in both modes. */
+ * palette. The sidebar carries the brand gradient; the page is flat --muted. */
 :root {
-  --sidebar: var(--primary);
-  --sidebar-foreground: var(--primary-foreground);
-  --sidebar-primary: var(--primary-foreground);
-  --sidebar-primary-foreground: var(--primary);
-  /* Hover/active wash: translucent white reads on purple in both modes. */
-  --sidebar-accent: rgb(255 255 255 / 0.14);
-  --sidebar-accent-foreground: var(--primary-foreground);
+  --sidebar: var(--background); /* fallback colour under the gradient */
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--secondary);
+  --sidebar-accent-foreground: var(--foreground);
   --sidebar-border: transparent; /* no divider lines around the sidebar */
-  --sidebar-ring: var(--primary-foreground);
+  --sidebar-ring: var(--ring);
+}
+
+/* The sidebar panel (desktop and the mobile drawer) uses the design
+ * system's --gradient. Unlayered, so it beats the bg-sidebar utility. */
+[data-sidebar="sidebar"] {
+  background: var(--gradient);
 }
 
 @theme inline {
@@ -29,3 +34,4 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
+
