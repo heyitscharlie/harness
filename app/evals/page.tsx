@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Typography } from "@heyitscharlie/design-system";
-import { SYSTEM_PROMPT } from "@/lib/assistant/agent";
+import { BROKEN_PROMPTS, SYSTEM_PROMPT } from "@/lib/assistant/agent";
 import { SUITE } from "@/lib/assistant/suite";
 import { EvalsPanel } from "../components/evals-panel";
 import { ProductionPanel } from "../components/production-panel";
@@ -25,7 +25,7 @@ export default function EvalsPage() {
         <ProductionPanel />
       </Suspense>
       <Typography variant="h2">Test suite</Typography>
-      <EvalsPanel cases={cases} defaultPrompt={SYSTEM_PROMPT} />
+      <EvalsPanel cases={cases} defaultPrompt={SYSTEM_PROMPT} presets={BROKEN_PROMPTS} />
     </div>
   );
 }

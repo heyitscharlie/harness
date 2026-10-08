@@ -13,7 +13,7 @@ A small, reusable **tool-calling agent** plus an **eval harness** that proves it
 | **Chat** (`/`, `/c/[id]`) | Talk to the agent. Each reply shows its tool calls, 👍/👎, and a **details** toggle with the full stored trace (latency, model, stop reason, every tool call's arguments and result). Titles are editable. |
 | **History** (`/history`) | Every saved conversation with its stats, plus an overall 👍/👎 and evaluation notes per conversation. Chats can be deleted. |
 | **Memory** (`/memory`) | What the agent *actually* saved with `add_note`, straight from Postgres, linked to the source chat. Memories can be deleted. |
-| **Evals** (`/evals`) | **Production:** live quality signals from real traffic (tool-error rate, step-limit hits, feedback, latency) and the replies that need a look. Replies that *claim* to have saved something without a successful `add_note` call are flagged as unverified. **Test suite:** fixed cases scored automatically, with an editable system prompt to check a change before shipping it. |
+| **Evals** (`/evals`) | **Production:** live quality signals from real traffic (tool-error rate, step-limit hits, feedback, latency) and the replies that need a look. Replies that *claim* to have saved something without a successful `add_note` call are flagged as unverified. **Test suite:** fixed cases scored automatically, with an editable system prompt to check a change before shipping it. **Broken-prompt presets** sabotage one rule each (no calculator, overeager memory, invents results, leaks its prompt) to show the suite catching that regression. |
 
 ## Architecture
 
@@ -33,6 +33,7 @@ lib/harness/     REUSABLE: no framework imports (enforced by ESLint)
 lib/assistant/     DEMO-SPECIFIC: replace in a new project
   tools.ts         calculator, get_current_time, add_note, list_notes
   agent.ts         system prompt (with a canary string for prompt-leak tests)
+                   + deliberately broken prompt presets for demoing failures
   suite.ts         the nine eval cases
 
 lib/history.ts   chat history in Postgres (raw SQL, bound parameters)

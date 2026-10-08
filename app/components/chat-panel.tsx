@@ -21,6 +21,19 @@ const SUGGESTIONS = [
   "What notes do I have?",
 ];
 
+/**
+ * Edge cases. Tested 8 Oct 2026 on gemini-flash-lite-latest: the first one
+ * genuinely fails (no power operation, so it doubles step by step and hits the
+ * step limit, which shows up in the Production panel); the rest it handles,
+ * which is worth showing too.
+ */
+const EDGE_CASES = [
+  "What's 2 to the power of 10?", // known failure: runs out of steps
+  "What time is it in Springfield?", // ambiguous: it asks which one
+  "What's 12 × 34 × 56?", // chains two calculator calls
+  "Convert 100 US dollars to euros", // no exchange-rate tool: says so instead of inventing
+];
+
 export function ChatPanel({
   conversationId,
   title,
@@ -112,6 +125,14 @@ export function ChatPanel({
           <div className="flex flex-wrap gap-2">
             {SUGGESTIONS.map((s) => (
               <Button key={s} variant="outline" size="sm" onClick={() => send(s)}>
+                {s}
+              </Button>
+            ))}
+          </div>
+          <Typography variant="label">Edge cases (the first one is a known failure):</Typography>
+          <div className="flex flex-wrap gap-2">
+            {EDGE_CASES.map((s) => (
+              <Button key={s} variant="ghost" size="sm" className="border border-dashed" onClick={() => send(s)}>
                 {s}
               </Button>
             ))}
