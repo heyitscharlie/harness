@@ -65,7 +65,7 @@ export function EvalsPanel({ cases, defaultPrompt }: { cases: CaseInfo[]; defaul
           rows={7}
           maxLength={4000}
           aria-label="System prompt"
-          className="w-full rounded-lg border border-input bg-transparent p-3 font-mono text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="w-full rounded-lg border border-input bg-background p-3 font-mono text-xs dark:bg-input/30 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
         <Typography variant="label">Edit the prompt and re-run to see if the agent still behaves.</Typography>
       </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Send } from "lucide-react";
 import { Button, Typography, cn } from "@heyitscharlie/design-system";
 import { Textarea } from "@/components/ui/textarea";
 import type { AgentStep } from "@/lib/harness/agent/tool";
@@ -98,7 +99,7 @@ export function ChatPanel() {
 
       {/* Sticky: stays pinned to the bottom of the screen while messages scroll behind it. */}
       <form
-        className="sticky bottom-0 -mx-4 mt-auto flex items-end gap-2 bg-muted/80 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8"
+        className="sticky bottom-0 -mx-4 mt-auto flex items-end gap-2 bg-muted/80 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-16 lg:px-32 xl:px-48"
         onSubmit={(e) => {
           e.preventDefault();
           send(input);
@@ -120,10 +121,10 @@ export function ChatPanel() {
           rows={1}
           aria-label="Message"
           // Grows with the text (field-sizing-content) up to max-h-48, then scrolls.
-          className="max-h-48 min-h-9 resize-none py-1.5"
+          className="max-h-48 min-h-9 resize-none bg-background py-1.5"
         />
-        <Button type="submit" size="lg" disabled={pending || !input.trim()}>
-          Send
+        <Button type="submit" size="icon-lg" aria-label="Send" disabled={pending || !input.trim()}>
+          <Send />
         </Button>
       </form>
     </div>
