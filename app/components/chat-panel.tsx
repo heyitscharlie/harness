@@ -29,7 +29,7 @@ const SUGGESTIONS = [
  */
 const EDGE_CASES = [
   "What's 2 to the power of 10?", // known failure: runs out of steps
-  "What time is it in Springfield?", // ambiguous: it asks which one
+  "What time is it in Springfield?", // ambiguous: inconsistent, sometimes asks which one, sometimes silently assumes Illinois
   "What's 12 × 34 × 56?", // chains two calculator calls
   "Convert 100 US dollars to euros", // no exchange-rate tool: says so instead of inventing
 ];
@@ -129,7 +129,7 @@ export function ChatPanel({
               </Button>
             ))}
           </div>
-          <Typography variant="label">Edge cases (the first one is a known failure):</Typography>
+          <Typography variant="label">Edge cases (the first two can fail):</Typography>
           <div className="flex flex-wrap gap-2">
             {EDGE_CASES.map((s) => (
               <Button key={s} variant="ghost" size="sm" className="border border-dashed" onClick={() => send(s)}>
