@@ -33,7 +33,7 @@ lib/harness/     REUSABLE: no framework imports (enforced by ESLint)
 lib/assistant/     DEMO-SPECIFIC: replace in a new project
   tools.ts         calculator, get_current_time, add_note, list_notes
   agent.ts         system prompt (with a canary string for prompt-leak tests)
-  suite.ts         the six eval cases
+  suite.ts         the nine eval cases
 
 lib/history.ts   chat history in Postgres (raw SQL, bound parameters)
 lib/memory.ts    the agent's memory: a Postgres-backed Store for the notes tools

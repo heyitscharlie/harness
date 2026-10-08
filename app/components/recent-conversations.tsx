@@ -25,7 +25,8 @@ export function RecentConversations() {
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (!cancelled) setItems(data);
-      });
+      })
+      .catch(() => {}); // offline or server error: keep showing the last list
     return () => {
       cancelled = true;
     };
