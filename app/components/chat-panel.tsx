@@ -82,7 +82,7 @@ export function ChatPanel() {
             {m.steps && <Trace steps={m.steps} />}
             <div
               className={cn(
-                "max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap",
+                "max-w-[min(85%,48rem)] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap",
                 m.role === "user" ? "bg-secondary text-secondary-foreground" : "border bg-card text-card-foreground",
               )}
             >

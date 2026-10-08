@@ -16,7 +16,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="bg-gradient-brand min-h-screen antialiased">
         <ThemeProvider defaultPalette="space" storageKey="harness-theme">
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
+          <div className="flex w-full flex-col gap-6 px-4 py-8 sm:px-8">
             <SiteHeader model={DEFAULT_MODEL} />
             <main>{children}</main>
           </div>
