@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FunctionDeclaration } from "@google/genai";
+import { toGeminiSchema } from "./gemini";
 
 /**
  * A tool the agent can call. The Zod schema does three jobs:
@@ -24,12 +25,10 @@ export function defineTool<S extends z.ZodType>(tool: Tool<S>): Tool<S> {
 
 /** What Gemini needs to know about a tool. */
 export function toFunctionDeclaration(tool: AnyTool): FunctionDeclaration {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { $schema, ...parameters } = z.toJSONSchema(tool.schema) as Record<string, unknown>;
   return {
     name: tool.name,
     description: tool.description,
-    parametersJsonSchema: parameters,
+    parametersJsonSchema: toGeminiSchema(tool.schema),
   };
 }
 

@@ -1,4 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
+import { z } from "zod";
+
+/** Zod schema → the plain JSON Schema object Gemini accepts. */
+export function toGeminiSchema(schema: z.ZodType): Record<string, unknown> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { $schema, ...jsonSchema } = z.toJSONSchema(schema) as Record<string, unknown>;
+  return jsonSchema;
+}
 
 /**
  * "latest" aliases follow Google's newest model. Handy for a demo, but for
