@@ -33,7 +33,7 @@ export function AppSidebar({ model }: { model: string }) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-2">
               {LINKS.map((link) => (
                 <SidebarMenuItem key={link.href}>
                   <SidebarMenuButton
