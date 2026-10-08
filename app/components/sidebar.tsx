@@ -28,7 +28,8 @@ const LINKS = [
 export function AppSidebar({ model }: { model: string }) {
   return (
     <Sidebar>
-      <SidebarHeader className="gap-1 p-4">
+      {/* pt-8 matches the page's top padding, so the sidebar title lines up with page titles. */}
+      <SidebarHeader className="gap-1 px-4 pt-8 pb-4">
         <Typography variant="h3">Agent Harness</Typography>
         <Typography variant="label">model: {model}</Typography>
       </SidebarHeader>
