@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FlaskConical, SquarePen } from "lucide-react";
+import { FlaskConical, History, SquarePen } from "lucide-react";
 import { ModeToggle, Typography } from "@heyitscharlie/design-system";
 import {
   Sidebar,
@@ -21,6 +21,7 @@ import { RecentConversations } from "./recent-conversations";
 
 const LINKS = [
   { href: "/", label: "New chat", icon: SquarePen },
+  { href: "/history", label: "History", icon: History },
   { href: "/evals", label: "Evals", icon: FlaskConical },
 ];
 
@@ -55,7 +56,7 @@ function SidebarNav() {
               <SidebarMenuItem key={link.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === link.href}
+                  isActive={isActive(link.href, pathname)}
                   className="data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium"
                 >
                   <Link href={link.href}>
@@ -76,4 +77,10 @@ function SidebarNav() {
       </SidebarGroup>
     </>
   );
+}
+
+/** History stays highlighted while reading one of its conversations. */
+function isActive(href: string, pathname: string) {
+  if (href === "/history") return pathname === "/history" || pathname.startsWith("/c/");
+  return pathname === href;
 }

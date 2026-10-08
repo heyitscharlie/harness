@@ -24,7 +24,17 @@ export type Turn = {
   feedback: -1 | 1 | null;
 };
 
-export type ConversationSummary = { id: string; title: string; createdAt: string };
+export type ConversationSummary = {
+  id: string;
+  title: string;
+  createdAt: string;
+  replies: number;
+  toolErrors: number;
+  thumbsUp: number;
+  thumbsDown: number;
+  rating: -1 | 1 | null; // overall, for the whole conversation
+  notes: string;
+};
 
 // Tagged templates send every ${value} as a bound parameter: no SQL injection.
 
@@ -38,10 +48,28 @@ export async function conversationExists(id: string): Promise<boolean> {
   return rows.length > 0;
 }
 
-export async function listConversations(limit = 30): Promise<ConversationSummary[]> {
+/** Conversations, newest first, with per-conversation quality signals. */
+export async function listConversations(limit = 100): Promise<ConversationSummary[]> {
   const rows = await sql()`
-    select id, title, created_at from conversations order by created_at desc limit ${limit}`;
-  return rows.map((r) => ({ id: r.id, title: r.title, createdAt: r.created_at }));
+    select c.id, c.title, c.created_at, c.rating, c.notes,
+      count(t.id) filter (where t.role = 'assistant') as replies,
+      count(t.id) filter (where t.role = 'assistant' and exists (
+        select 1 from jsonb_array_elements(t.steps) s where (s->>'ok')::boolean = false)) as tool_errors,
+      count(t.id) filter (where t.feedback = 1) as thumbs_up,
+      count(t.id) filter (where t.feedback = -1) as thumbs_down
+    from conversations c left join turns t on t.conversation_id = c.id
+    group by c.id order by c.created_at desc limit ${limit}`;
+  return rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    createdAt: r.created_at,
+    replies: Number(r.replies),
+    toolErrors: Number(r.tool_errors),
+    thumbsUp: Number(r.thumbs_up),
+    thumbsDown: Number(r.thumbs_down),
+    rating: r.rating,
+    notes: r.notes ?? "",
+  }));
 }
 
 export async function getTurns(conversationId: string): Promise<Turn[]> {
@@ -73,6 +101,19 @@ export async function saveExchange(
       returning id`,
   ]);
   return Number(inserted[0].id);
+}
+
+/** Conversation-level evaluation. Only the fields provided are changed. */
+export async function updateEvaluation(
+  id: string,
+  changes: { rating?: -1 | 1 | null; notes?: string },
+): Promise<boolean> {
+  const rows = await sql()`
+    update conversations set
+      rating = case when ${"rating" in changes}::boolean then ${changes.rating ?? null}::smallint else rating end,
+      notes = case when ${"notes" in changes}::boolean then ${changes.notes ?? null} else notes end
+    where id = ${id} returning id`;
+  return rows.length > 0;
 }
 
 export async function setFeedback(turnId: number, value: -1 | 1 | null): Promise<boolean> {

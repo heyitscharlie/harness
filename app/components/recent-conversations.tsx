@@ -13,7 +13,7 @@ export function RecentConversations() {
 
   useEffect(() => {
     let cancelled = false; // ignore a slow response if we've navigated again since
-    fetch("/api/conversations")
+    fetch("/api/conversations?limit=15")
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (!cancelled) setItems(data);

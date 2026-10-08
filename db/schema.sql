@@ -21,3 +21,7 @@ create table if not exists turns (
 );
 
 create index if not exists turns_conversation_idx on turns (conversation_id, id);
+
+-- Conversation-level evaluation: an overall rating and free-text notes.
+alter table conversations add column if not exists rating smallint check (rating in (-1, 1));
+alter table conversations add column if not exists notes text;
