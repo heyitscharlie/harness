@@ -1,9 +1,14 @@
 import type { Content, Part } from "@google/genai";
+import { z } from "zod";
 import { DEFAULT_MODEL, generate } from "./gemini";
 import { callTool, toFunctionDeclaration, type AgentStep, type AnyTool } from "./tool";
 
 /** The simple message shape the UI and API use. */
-export type ChatMessage = { role: "user" | "assistant"; text: string };
+export const ChatMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  text: z.string().min(1).max(4000), // caps tokens per message: cost, latency and reliability
+});
+export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 
 export type AgentConfig = {
   systemPrompt: string;
