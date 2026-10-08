@@ -3,11 +3,22 @@ import { z } from "zod";
 import { defineTool } from "@/lib/harness/agent/tool";
 
 /**
- * Where tools write to. Passed in rather than global so each eval case gets
- * a fresh, isolated store (and a real app could swap in a database).
+ * Where notes are saved. Passed in rather than global: evals use a fresh
+ * in-memory store per case (isolated), while the chat uses Postgres
+ * (lib/memory.ts) so "I've saved that" is actually true.
  */
-export type Store = { notes: string[] };
-export const createStore = (): Store => ({ notes: [] });
+export type Store = {
+  addNote(text: string): Promise<number>; // returns the new total
+  listNotes(): Promise<string[]>;
+};
+
+export function createStore(): Store {
+  const notes: string[] = [];
+  return {
+    addNote: async (text) => notes.push(text),
+    listNotes: async () => [...notes],
+  };
+}
 
 export function createTools(store: Store) {
   return [
@@ -47,17 +58,14 @@ export function createTools(store: Store) {
       name: "add_note",
       description: "Save a note for the user to remember later.",
       schema: z.object({ text: z.string().min(1).max(500) }),
-      execute: ({ text }) => {
-        store.notes.push(text);
-        return { saved: true, count: store.notes.length };
-      },
+      execute: async ({ text }) => ({ saved: true, count: await store.addNote(text) }),
     }),
 
     defineTool({
       name: "list_notes",
       description: "List the user's saved notes.",
       schema: z.object({}),
-      execute: () => ({ notes: store.notes }),
+      execute: async () => ({ notes: await store.listNotes() }),
     }),
   ];
 }

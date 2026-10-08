@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { updateConversation } from "@/lib/history";
+import { deleteConversation, updateConversation } from "@/lib/history";
 
 const UpdateSchema = z
   .object({
@@ -20,5 +20,14 @@ export async function PATCH(request: Request, { params }: RouteContext<"/api/con
   }
   const updated = await updateConversation(id, parsed.data);
   if (!updated) return Response.json({ error: "Conversation not found" }, { status: 404 });
+  return Response.json({ ok: true });
+}
+
+/** Delete a conversation and its turns. Memories it created are kept, unlinked. */
+export async function DELETE(_request: Request, { params }: RouteContext<"/api/conversations/[id]">) {
+  const { id } = await params;
+  if (!z.uuid().safeParse(id).success) return Response.json({ error: "Invalid id" }, { status: 400 });
+  const deleted = await deleteConversation(id);
+  if (!deleted) return Response.json({ error: "Conversation not found" }, { status: 404 });
   return Response.json({ ok: true });
 }

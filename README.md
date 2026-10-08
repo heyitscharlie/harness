@@ -11,8 +11,9 @@ A small, reusable **tool-calling agent** plus an **eval harness** that proves it
 | Page | What it's for |
 | --- | --- |
 | **Chat** (`/`, `/c/[id]`) | Talk to the agent. Each reply shows its tool calls, 👍/👎, and a **details** toggle with the full stored trace (latency, model, stop reason, every tool call's arguments and result). Titles are editable. |
-| **History** (`/history`) | Every saved conversation with its stats, plus an overall 👍/👎 and evaluation notes per conversation. |
-| **Evals** (`/evals`) | **Production:** live quality signals from real traffic (tool-error rate, step-limit hits, feedback, latency) and the replies that need a look. **Test suite:** fixed cases scored automatically, with an editable system prompt to check a change before shipping it. |
+| **History** (`/history`) | Every saved conversation with its stats, plus an overall 👍/👎 and evaluation notes per conversation. Chats can be deleted. |
+| **Memory** (`/memory`) | What the agent *actually* saved with `add_note`, straight from Postgres, linked to the source chat. Memories can be deleted. |
+| **Evals** (`/evals`) | **Production:** live quality signals from real traffic (tool-error rate, step-limit hits, feedback, latency) and the replies that need a look. Replies that *claim* to have saved something without a successful `add_note` call are flagged as unverified. **Test suite:** fixed cases scored automatically, with an editable system prompt to check a change before shipping it. |
 
 ## Architecture
 
@@ -35,7 +36,8 @@ lib/example/     DEMO-SPECIFIC: replace in a new project
   suite.ts         the six eval cases
 
 lib/history.ts   chat history in Postgres (raw SQL, bound parameters)
-db/schema.sql    conversations + turns (traces stored as JSONB)
+lib/memory.ts    the agent's memory: a Postgres-backed Store for the notes tools
+db/schema.sql    conversations, turns (traces as JSONB), memories
 app/             UI and thin API routes: validate with Zod, call the harness,
                  map failures to status codes
 ```
@@ -47,6 +49,7 @@ app/             UI and thin API routes: validate with Zod, call the harness,
 - **Check behaviour, not just text.** Evals assert which tools were called and with what arguments. Text checks normalise numbers (`7,006,652` = `7006652`).
 - **Errored ≠ failed.** A rate limit says nothing about prompt quality, so provider errors are reported separately and never counted as regressions.
 - **The server owns the conversation.** The client sends one message; history is loaded from Postgres, capped to limit tokens, and can't be tampered with.
+- **Verify claims against reality.** The agent saying "I've saved that" isn't evidence; the `memories` table is. Evals use an in-memory store per case for isolation; the chat uses Postgres.
 - **Offline + online evals.** The test suite catches regressions you can predict; production traces, feedback and review notes catch the ones you can't.
 
 ## Reusing the harness in another project

@@ -50,6 +50,12 @@ export async function getConversation(id: string): Promise<{ id: string; title: 
   return rows[0] ? { id: rows[0].id, title: rows[0].title } : null;
 }
 
+/** Deletes the conversation and its turns. Its memories are kept (unlinked). */
+export async function deleteConversation(id: string): Promise<boolean> {
+  const rows = await sql()`delete from conversations where id = ${id} returning id`;
+  return rows.length > 0;
+}
+
 export async function conversationExists(id: string): Promise<boolean> {
   const rows = await sql()`select 1 from conversations where id = ${id}`;
   return rows.length > 0;
@@ -136,6 +142,7 @@ export type ProductionStats = {
   replies: number;
   toolErrors: number;
   stepLimit: number;
+  unverifiedSaves: number; // replies claiming to have saved something without a successful add_note
   thumbsUp: number;
   thumbsDown: number;
   avgLatencyMs: number | null;
@@ -150,23 +157,28 @@ export async function getProductionStats(): Promise<ProductionStats> {
       count(*) filter (where exists (
         select 1 from jsonb_array_elements(steps) s where (s->>'ok')::boolean = false)) as tool_errors,
       count(*) filter (where stopped_reason = 'max_steps') as step_limit,
+      count(*) filter (where text ~* '\\m(saved|noted|remembered|i will remember|i''ll remember)\\M' and not exists (
+        select 1 from jsonb_array_elements(steps) s where s->>'tool' = 'add_note' and (s->>'ok')::boolean)) as unverified_saves,
       count(*) filter (where feedback = 1) as thumbs_up,
       count(*) filter (where feedback = -1) as thumbs_down,
       round(avg(latency_ms)) as avg_latency
     from turns where role = 'assistant'`;
 
-  // The replies worth a human look: 👎 or hit the step limit, newest first.
+  // The replies worth a human look: 👎, hit the step limit, or claimed a save that didn't happen.
   const flagged = await sql()`
     select t.conversation_id, c.title, t.text,
-      case when t.feedback = -1 then '👎' else 'step limit' end as reason
+      case when t.feedback = -1 then '👎' when t.stopped_reason = 'max_steps' then 'step limit' else 'unverified save' end as reason
     from turns t join conversations c on c.id = t.conversation_id
-    where t.role = 'assistant' and (t.feedback = -1 or t.stopped_reason = 'max_steps')
+    where t.role = 'assistant' and (t.feedback = -1 or t.stopped_reason = 'max_steps' or (
+      t.text ~* '\\m(saved|noted|remembered|i will remember|i''ll remember)\\M' and not exists (
+        select 1 from jsonb_array_elements(t.steps) s where s->>'tool' = 'add_note' and (s->>'ok')::boolean)))
     order by t.id desc limit 10`;
 
   return {
     replies: Number(totals.replies),
     toolErrors: Number(totals.tool_errors),
     stepLimit: Number(totals.step_limit),
+    unverifiedSaves: Number(totals.unverified_saves),
     thumbsUp: Number(totals.thumbs_up),
     thumbsDown: Number(totals.thumbs_down),
     avgLatencyMs: totals.avg_latency === null ? null : Number(totals.avg_latency),

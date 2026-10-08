@@ -14,6 +14,7 @@ export async function ProductionPanel() {
     { label: "replies", value: String(s.replies) },
     { label: "with a tool error", value: pct(s.toolErrors, s.replies) },
     { label: "hit the step limit", value: String(s.stepLimit) },
+    { label: "unverified \"saved\" claims", value: String(s.unverifiedSaves) },
     { label: "👍 / 👎", value: `${s.thumbsUp} / ${s.thumbsDown}` },
     { label: "avg latency", value: s.avgLatencyMs === null ? "–" : `${(s.avgLatencyMs / 1000).toFixed(1)}s` },
   ];
@@ -21,7 +22,7 @@ export async function ProductionPanel() {
   return (
     <section className="flex flex-col gap-3">
       <Typography variant="h2">Production</Typography>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {tiles.map((t) => (
           <Card key={t.label} variant="card-transparent" className="gap-1 border p-4">
             <span className="font-mono text-xl">{t.value}</span>
@@ -33,7 +34,7 @@ export async function ProductionPanel() {
         <CardTitle className="text-base">Needs a look</CardTitle>
         <CardContent className="flex flex-col gap-1 text-sm">
           {s.flagged.length === 0 ? (
-            <Typography variant="label">Nothing flagged: no 👎 and no step-limit hits yet.</Typography>
+            <Typography variant="label">Nothing flagged: no 👎, step-limit hits or unverified saves.</Typography>
           ) : (
             s.flagged.map((f, i) => (
               <Link key={i} href={`/c/${f.conversationId}`} className="truncate hover:underline">

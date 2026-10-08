@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FlaskConical, History, SquarePen } from "lucide-react";
+import { Brain, FlaskConical, History, SquarePen } from "lucide-react";
 import { ModeToggle, Typography } from "@heyitscharlie/design-system";
 import {
   Sidebar,
@@ -22,6 +22,7 @@ import { RecentConversations } from "./recent-conversations";
 const LINKS = [
   { href: "/", label: "New chat", icon: SquarePen },
   { href: "/history", label: "History", icon: History },
+  { href: "/memory", label: "Memory", icon: Brain },
   { href: "/evals", label: "Evals", icon: FlaskConical },
 ];
 

@@ -25,3 +25,11 @@ create index if not exists turns_conversation_idx on turns (conversation_id, id)
 -- Conversation-level evaluation: an overall rating and free-text notes.
 alter table conversations add column if not exists rating smallint check (rating in (-1, 1));
 alter table conversations add column if not exists notes text;
+
+-- What the agent saved with add_note. Kept if the source chat is deleted.
+create table if not exists memories (
+  id bigint generated always as identity primary key,
+  text text not null,
+  conversation_id uuid references conversations (id) on delete set null,
+  created_at timestamptz not null default now()
+);

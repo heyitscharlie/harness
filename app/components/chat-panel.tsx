@@ -7,6 +7,7 @@ import { Button, Typography, cn } from "@heyitscharlie/design-system";
 import { Textarea } from "@/components/ui/textarea";
 import type { Turn } from "@/lib/history";
 import { ChatTitle } from "./chat-title";
+import { DeleteButton } from "./delete-button";
 import { TurnDetails } from "./turn-details";
 import { Trace } from "./trace";
 
@@ -84,7 +85,10 @@ export function ChatPanel({
     // flex-1: fill the height <main> leaves, so the input sits at the bottom even when empty.
     <div className="flex flex-1 flex-col gap-4">
       {conversationId && title ? (
-        <ChatTitle conversationId={conversationId} initialTitle={title} />
+        <div className="flex items-center justify-between gap-3">
+          <ChatTitle conversationId={conversationId} initialTitle={title} />
+          <DeleteButton endpoint={`/api/conversations/${conversationId}`} label="chat" redirectTo="/history" />
+        </div>
       ) : (
         <Typography variant="h2">New chat</Typography>
       )}
