@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Typography } from "@heyitscharlie/design-system";
 import { SYSTEM_PROMPT } from "@/lib/example/agent";
 import { SUITE } from "@/lib/example/suite";
 import { EvalsPanel } from "../components/evals-panel";
+import { ProductionPanel } from "../components/production-panel";
 
 export const metadata: Metadata = { title: "Evals · Agent Harness" };
 
@@ -19,6 +21,10 @@ export default function EvalsPage() {
           arguments, and what it replied. Edit the system prompt to check a change before shipping it.
         </p>
       </div>
+      <Suspense fallback={<Typography variant="label">Loading production stats…</Typography>}>
+        <ProductionPanel />
+      </Suspense>
+      <Typography variant="h2">Test suite</Typography>
       <EvalsPanel cases={cases} defaultPrompt={SYSTEM_PROMPT} />
     </div>
   );

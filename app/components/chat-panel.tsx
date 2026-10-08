@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Send, ThumbsDown, ThumbsUp } from "lucide-react";
 import { Button, Typography, cn } from "@heyitscharlie/design-system";
 import { Textarea } from "@/components/ui/textarea";
-import type { AgentStep } from "@/lib/harness/agent/tool";
-import type { AgentResult } from "@/lib/harness/agent/run-agent";
+import type { Turn } from "@/lib/history";
 import { Trace } from "./trace";
 
-type Message = { role: "user" | "assistant"; text: string; steps?: AgentStep[] };
+// id is missing only on the user's message until the page reloads from the database.
+type Message = Omit<Turn, "id" | "latencyMs"> & { id?: number };
 
 const SUGGESTIONS = [
   "What's 1234 × 5678?",
@@ -17,11 +18,9 @@ const SUGGESTIONS = [
   "What notes do I have?",
 ];
 
-/** Matches the server's cap; older turns are dropped (simplest context management). */
-const MAX_HISTORY = 30;
-
-export function ChatPanel() {
-  const [messages, setMessages] = useState<Message[]>([]);
+export function ChatPanel({ conversationId, initialTurns = [] }: { conversationId?: string; initialTurns?: Turn[] }) {
+  const router = useRouter();
+  const [messages, setMessages] = useState<Message[]>(initialTurns);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,32 +33,38 @@ export function ChatPanel() {
 
   async function send(text: string) {
     if (!text.trim() || pending) return;
-    const next: Message[] = [...messages, { role: "user", text: text.trim() }];
-    setMessages(next);
+    setMessages((m) => [...m, { role: "user", text: text.trim(), steps: [], feedback: null }]);
     setInput("");
     setPending(true);
     setError(null);
 
-    // Stateless server: send the conversation (text only), trimmed to the cap.
-    let history = next.slice(-MAX_HISTORY).map(({ role, text }) => ({ role, text }));
-    if (history[0]?.role === "assistant") history = history.slice(1);
-
     try {
+      // Only the new message: the server loads earlier turns from the database.
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ conversationId, message: text.trim() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `Request failed (${res.status})`);
-      const result = data as AgentResult;
-      // An empty reply would fail validation on the next turn, so never store one.
-      setMessages([...next, { role: "assistant", text: result.reply.trim() || "(no reply)", steps: result.steps }]);
+      setMessages((m) => [...m, data.turn]);
+      // First message of a new chat: move to its permanent URL.
+      if (!conversationId) router.replace(`/c/${data.conversationId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setPending(false);
     }
+  }
+
+  async function rate(turnId: number, current: -1 | 1 | null, value: -1 | 1) {
+    const next = current === value ? null : value; // clicking again clears it
+    setMessages((m) => m.map((msg) => (msg.id === turnId ? { ...msg, feedback: next } : msg))); // optimistic
+    await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ turnId, value: next }),
+    });
   }
 
   return (
@@ -80,8 +85,8 @@ export function ChatPanel() {
 
       <div className="flex flex-1 flex-col gap-3">
         {messages.map((m, i) => (
-          <div key={i} className={cn("flex flex-col gap-2", m.role === "user" ? "items-end" : "items-start")}>
-            {m.steps && <Trace steps={m.steps} />}
+          <div key={m.id ?? `pending-${i}`} className={cn("flex flex-col gap-2", m.role === "user" ? "items-end" : "items-start")}>
+            {m.role === "assistant" && <Trace steps={m.steps} />}
             <div
               className={cn(
                 "max-w-[min(85%,48rem)] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap",
@@ -90,6 +95,26 @@ export function ChatPanel() {
             >
               {m.text}
             </div>
+            {m.role === "assistant" && m.id !== undefined && (
+              <div className="flex gap-1">
+                {([1, -1] as const).map((value) => {
+                  const Icon = value === 1 ? ThumbsUp : ThumbsDown;
+                  return (
+                    <Button
+                      key={value}
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label={value === 1 ? "Good reply" : "Bad reply"}
+                      aria-pressed={m.feedback === value}
+                      onClick={() => rate(m.id!, m.feedback, value)}
+                      className={cn(m.feedback === value ? "text-primary" : "text-muted-foreground")}
+                    >
+                      <Icon className={cn(m.feedback === value && "fill-current")} />
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         ))}
         {pending && <Typography variant="label">Thinking…</Typography>}
