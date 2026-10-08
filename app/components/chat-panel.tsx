@@ -120,9 +120,9 @@ export function ChatPanel() {
           rows={1}
           aria-label="Message"
           // Grows with the text (field-sizing-content) up to max-h-48, then scrolls.
-          className="max-h-48 min-h-10 resize-none"
+          className="max-h-48 min-h-9 resize-none py-1.5"
         />
-        <Button type="submit" disabled={pending || !input.trim()}>
+        <Button type="submit" size="lg" disabled={pending || !input.trim()}>
           Send
         </Button>
       </form>
