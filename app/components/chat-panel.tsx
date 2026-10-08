@@ -42,6 +42,19 @@ export function ChatPanel({
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, pending]);
 
+  // Next keeps a page you navigate away from alive but hidden (React
+  // <Activity>), state included, and runs effect cleanups when it hides.
+  // A *new* chat has moved to /c/[id] by then, so reset it: otherwise
+  // "New chat" would reappear showing the previous conversation.
+  useEffect(() => {
+    if (conversationId) return;
+    return () => {
+      setMessages([]);
+      setInput("");
+      setError(null);
+    };
+  }, [conversationId]);
+
   async function send(text: string) {
     if (!text.trim() || pending) return;
     setMessages((m) => [
