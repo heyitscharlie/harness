@@ -83,7 +83,7 @@ export function ChatPanel() {
             <div
               className={cn(
                 "max-w-[min(85%,48rem)] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap",
-                m.role === "user" ? "bg-secondary text-secondary-foreground" : "border bg-card text-card-foreground",
+                m.role === "user" ? "bg-primary text-primary-foreground" : "border bg-card text-card-foreground",
               )}
             >
               {m.text}
