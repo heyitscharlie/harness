@@ -43,6 +43,11 @@ export async function createConversation(title: string): Promise<string> {
   return rows[0].id;
 }
 
+export async function getConversation(id: string): Promise<{ id: string; title: string } | null> {
+  const rows = await sql()`select id, title from conversations where id = ${id}`;
+  return rows[0] ? { id: rows[0].id, title: rows[0].title } : null;
+}
+
 export async function conversationExists(id: string): Promise<boolean> {
   const rows = await sql()`select 1 from conversations where id = ${id}`;
   return rows.length > 0;
@@ -103,13 +108,14 @@ export async function saveExchange(
   return Number(inserted[0].id);
 }
 
-/** Conversation-level evaluation. Only the fields provided are changed. */
-export async function updateEvaluation(
+/** Update a conversation's title and/or evaluation. Only the fields provided change. */
+export async function updateConversation(
   id: string,
-  changes: { rating?: -1 | 1 | null; notes?: string },
+  changes: { title?: string; rating?: -1 | 1 | null; notes?: string },
 ): Promise<boolean> {
   const rows = await sql()`
     update conversations set
+      title = coalesce(${changes.title ?? null}, title),
       rating = case when ${"rating" in changes}::boolean then ${changes.rating ?? null}::smallint else rating end,
       notes = case when ${"notes" in changes}::boolean then ${changes.notes ?? null} else notes end
     where id = ${id} returning id`;

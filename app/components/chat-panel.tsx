@@ -6,6 +6,7 @@ import { Send, ThumbsDown, ThumbsUp } from "lucide-react";
 import { Button, Typography, cn } from "@heyitscharlie/design-system";
 import { Textarea } from "@/components/ui/textarea";
 import type { Turn } from "@/lib/history";
+import { ChatTitle } from "./chat-title";
 import { Trace } from "./trace";
 
 // id is missing only on the user's message until the page reloads from the database.
@@ -18,7 +19,15 @@ const SUGGESTIONS = [
   "What notes do I have?",
 ];
 
-export function ChatPanel({ conversationId, initialTurns = [] }: { conversationId?: string; initialTurns?: Turn[] }) {
+export function ChatPanel({
+  conversationId,
+  title,
+  initialTurns = [],
+}: {
+  conversationId?: string;
+  title?: string;
+  initialTurns?: Turn[];
+}) {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialTurns);
   const [input, setInput] = useState("");
@@ -70,6 +79,12 @@ export function ChatPanel({ conversationId, initialTurns = [] }: { conversationI
   return (
     // flex-1: fill the height <main> leaves, so the input sits at the bottom even when empty.
     <div className="flex flex-1 flex-col gap-4">
+      {conversationId && title ? (
+        <ChatTitle conversationId={conversationId} initialTitle={title} />
+      ) : (
+        <Typography variant="h2">New chat</Typography>
+      )}
+
       {messages.length === 0 && (
         <div className="flex flex-col gap-3">
           <Typography variant="label">Try one of these, or ask anything:</Typography>
