@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@heyitscharlie/design-system";
+import { DEFAULT_MODEL } from "@/lib/harness/agent/gemini";
+import { SiteHeader } from "./components/site-header";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Eval Harness",
-  description: "Run LLM test suites against Gemini and score the outputs.",
+  title: "Agent Harness",
+  description: "A reusable tool-calling agent, with evals that prove it behaves.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -14,7 +16,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" suppressHydrationWarning>
       <body className="bg-gradient-brand min-h-screen antialiased">
         <ThemeProvider defaultPalette="space" storageKey="harness-theme">
-          {children}
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
+            <SiteHeader model={DEFAULT_MODEL} />
+            <main>{children}</main>
+          </div>
         </ThemeProvider>
       </body>
     </html>
