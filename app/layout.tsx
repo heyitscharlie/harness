@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@heyitscharlie/design-system";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { DEFAULT_MODEL } from "@/lib/harness/agent/gemini";
-import { SiteHeader } from "./components/site-header";
+import { AppSidebar } from "./components/sidebar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,13 +18,24 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="bg-gradient-brand min-h-screen antialiased">
         <ThemeProvider defaultPalette="space" storageKey="harness-theme">
-          <div className="flex min-h-dvh w-full flex-col gap-6 px-4 pt-8 sm:px-8">
-            <SiteHeader model={DEFAULT_MODEL} />
-            <main className="flex flex-1 flex-col">{children}</main>
-            <footer className="py-4 text-center font-mono text-xs text-muted-foreground">
-              © 2026 Charlie Martins
-            </footer>
-          </div>
+          <TooltipProvider>
+            <SidebarProvider>
+              <AppSidebar model={DEFAULT_MODEL} />
+              {/* Transparent so the body's gradient shows through. */}
+              <SidebarInset className="bg-transparent">
+                {/* On mobile the sidebar is a drawer; this button opens it. */}
+                <div className="px-4 pt-4 md:hidden">
+                  <SidebarTrigger />
+                </div>
+                <div className="flex flex-1 flex-col px-4 pt-8 sm:px-8">
+                  {children}
+                  <footer className="py-4 text-center font-mono text-xs text-muted-foreground">
+                    © 2026 Charlie Martins
+                  </footer>
+                </div>
+              </SidebarInset>
+            </SidebarProvider>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
